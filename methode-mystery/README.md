@@ -2,7 +2,7 @@
 
 26 octobre 2026 · LIPARIT Zakaryan · Version 2 : phrases prêtes, déroulé minute par minute, plan d'entraînement
 
-> Version modifiable en ligne (version 1, sans les ajouts) : https://claude.ai/artifact/BeCiz5zEQRDxJ5gBgkSgp9
+> Version modifiable en ligne : https://claude.ai/artifact/BeCiz5zEQRDxJ5gBgkSgp9
 
 ## Sommaire
 
