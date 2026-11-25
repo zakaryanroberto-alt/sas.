@@ -217,6 +217,27 @@ const onFile=async e=>{const f=e.target.files?.[0];e.target.value='';if(!f)retur
 $('#fCam').onchange=onFile;$('#fGal').onchange=onFile;
 $('#byName').onkeydown=e=>{if(e.key==='Enter'&&e.target.value.trim()){e.preventDefault();cur.img=null;analyze({text:e.target.value.trim()})}};
 $('#bStop').onclick=()=>ac?.abort();
+/* code-barres */
+let bcStream=null,bcTimer=null;
+function bcStop(){clearInterval(bcTimer);bcStream&&bcStream.getTracks().forEach(t=>t.stop());bcStream=null;const d=$('#dBar');if(d.open)d.close()}
+async function bcStart(){
+  const det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a']});
+  try{bcStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}})}catch(e){toast('Caméra refusée.');return}
+  const v=$('#bVid');v.srcObject=bcStream;await v.play().catch(()=>{});$('#dBar').showModal();
+  bcTimer=setInterval(async()=>{try{const r=await det.detect(v);if(r[0]){const code=r[0].rawValue;bcStop();lookup(code)}}catch(e){}},350);
+}
+async function lookup(code){
+  toast('Code '+code+' : recherche du produit…');
+  try{
+    const r=await fetch('https://world.openfoodfacts.org/api/v2/product/'+encodeURIComponent(code)+'.json?fields=product_name,brands,quantity');const j=await r.json();
+    const p=j.product,name=p&&[p.brands,p.product_name].filter(Boolean).join(' ');
+    if(j.status!==1||!name){toast('Produit inconnu : tapez le nom du vin.');$('#byName').focus();return}
+    $('#byName').value=name;cur.img=null;analyze({text:name});
+  }catch(e){toast('Recherche impossible : tapez le nom du vin.')}
+}
+if('BarcodeDetector' in window&&navigator.mediaDevices){$('#bBar').hidden=false;$('#bBar').onclick=bcStart}
+$('#bBarX').onclick=bcStop;$('#dBar').addEventListener('cancel',bcStop);
+window.addEventListener('offline',()=>toast('Hors connexion : les analyses sont indisponibles.'));
 $('#tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;tab=b.dataset.t;renderDetails()};
 $('#cardIn').addEventListener('click',e=>{const b=e.target.closest('.qk button');if(b){openD();ask(b.textContent)}});
 
@@ -382,7 +403,7 @@ function gameHtml(list){
 $('#details').addEventListener('click',e=>{
   const f=e.target.closest('.fam');
   if(f&&!f.disabled){const t=cur.mine.tasting||(cur.mine.tasting={picked:[],done:false});const k=f.dataset.f;t.picked=t.picked.includes(k)?t.picked.filter(x=>x!==k):[...t.picked,k];renderDetails();return}
-  if(e.target.closest('#gGo')){cur.mine.tasting.done=true;cur.mine.tasting.date=Date.now();renderDetails();autoSave();return}
+  if(e.target.closest('#gGo')){const t=cur.mine.tasting,ex=[...new Set((cur.data.nose||[]).map(famOf).filter(Boolean).map(f=>f.k))];t.done=true;t.date=Date.now();t.hit=ex.filter(k=>t.picked.includes(k)).length;t.total=ex.length;renderDetails();autoSave();return}
   if(e.target.closest('#gRe')){cur.mine.tasting={picked:[],done:false};renderDetails();autoSave()}
 });
 const LEVELS=[[0,'Curieux'],[5,'Apprenti'],[15,'Amateur'],[30,'Initié'],[60,'Connaisseur']];
@@ -390,10 +411,11 @@ function renderLearn(){
   const all=cave,done=all.filter(w=>w.mine?.status===CFG.doneStatus).length,games=all.filter(w=>w.mine?.tasting?.done).length;
   const pts=all.length+done*2+games*2+all.filter(w=>(w.mine?.notes||'').trim().length>20).length;let i=0;LEVELS.forEach((x,j)=>{if(pts>=x[0])i=j});const nx=LEVELS[i+1];
   const pct=nx?Math.round((pts-LEVELS[i][0])/(nx[0]-LEVELS[i][0])*100):100;
+  const gp=all.map(w=>w.mine?.tasting).filter(t=>t&&t.done&&t.total),gH=gp.reduce((a,t)=>a+t.hit,0),gT=gp.reduce((a,t)=>a+t.total,0);
   const musts=CFG.musts.map(m=>({...m,ok:all.some(w=>m.test(w.data||{}))})),nOk=musts.filter(m=>m.ok).length;
   const lex=new Map();all.forEach(w=>(w.data?.glossary||[]).forEach(g=>{const k=String(g.term||'').toLowerCase().trim();if(k&&!lex.has(k))lex.set(k,g)}));
   const L=[...lex.values()].sort((a,b)=>String(a.term).localeCompare(String(b.term),'fr'));
-  $('#lvl').innerHTML=`<div class="lvlTop"><div><span class="conf" style="color:rgba(255,255,255,.75)">Votre niveau</span><b class="lvlName">${LEVELS[i][1]}</b></div><div class="lvlPts"><b>${pts}</b><span>points</span></div></div><div class="lvlBar"><i style="width:${pct}%"></i></div><p class="lvlNext">${nx?`Encore ${nx[0]-pts} points pour devenir <b>${nx[1]}</b>.`:'Niveau maximum atteint, chapeau !'} ${CFG.pointsRule}</p>`;
+  $('#lvl').innerHTML=`<div class="lvlTop"><div><span class="conf" style="color:rgba(255,255,255,.75)">Votre niveau</span><b class="lvlName">${LEVELS[i][1]}</b></div><div class="lvlPts"><b>${pts}</b><span>points</span></div></div><div class="lvlBar"><i style="width:${pct}%"></i></div><p class="lvlNext">${nx?`Encore ${nx[0]-pts} points pour devenir <b>${nx[1]}</b>.`:'Niveau maximum atteint, chapeau !'} ${CFG.pointsRule}</p>${gT?`<p class="lvlNext">Votre nez : <b>${Math.round(gH/gT*100)} %</b> d’arômes retrouvés sur ${gp.length} test${gp.length>1?'s':''}.</p>`:''}`;
   $('#learnBody').innerHTML=`
   <section class="sec full"><h3>${CFG.mustTitle} <small class="cnt">${nOk}/${musts.length}</small></h3><p class="conf">${CFG.mustHint}</p><div class="musts">${musts.map(m=>`<div class="must ${m.ok?'ok':''}"><span class="ck" aria-hidden="true"></span><b>${esc(m.t)}</b><small>${esc(m.d)}</small></div>`).join('')}</div></section>
   <section class="sec full"><h3>Les bases en 2 minutes</h3><div class="basics">${CFG.basics.map((b,j)=>`<details ${j===0?'open':''}><summary>${esc(b[0])}</summary><ul>${b[1].map(x=>`<li>${x}</li>`).join('')}</ul></details>`).join('')}</div></section>

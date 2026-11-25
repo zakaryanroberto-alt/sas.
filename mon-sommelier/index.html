@@ -34,6 +34,7 @@
           <button class="btn main" id="bCam">Photographier la bouteille</button>
           <button class="btn ghost" id="bGal">Depuis la galerie</button>
         </div>
+        <button class="btn ghost" id="bBar" type="button" hidden>Scanner le code-barres</button>
         <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
         <input type="file" id="fGal" accept="image/*" hidden>
         <div class="opts">
@@ -92,6 +93,7 @@
     <p>Votre cave est enregistrée uniquement sur cet appareil. Pensez à exporter une sauvegarde de temps en temps.</p>
   </form>
 </dialog>
+<dialog id="dBar" aria-label="Scanner un code-barres"><div class="dlg"><h3>Code-barres</h3><video id="bVid" playsinline muted style="width:100%;border-radius:12px;background:#000"></video><p>Cadrez le code-barres de la bouteille.</p><button type="button" class="btn line" id="bBarX">Annuler</button></div></dialog>
 <div class="toast" id="toast"></div>
 
 <script src="engine.js"></script>

@@ -1,4 +1,4 @@
-const C = 'sommelier-v1';
+const C = 'sommelier-v2';
 const SHELL = ['./', 'index.html', 'style.css', 'app.js', 'engine.js', 'manifest.webmanifest', 'icon.svg', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(C).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
@@ -10,7 +10,7 @@ self.addEventListener('fetch', e => {
   if (u.origin === location.origin) {
     // réseau d'abord (mises à jour), cache en secours (hors ligne)
     e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(C).then(c => c.put(req, cp)); return r; }).catch(() => caches.match(req).then(r => r || caches.match('index.html'))));
-  } else {
+  } else if(/fonts\.(googleapis|gstatic)\.com$/.test(u.hostname)) {
     // polices : cache d'abord
     e.respondWith(caches.match(req).then(r => r || fetch(req).then(n => { const cp = n.clone(); caches.open(C).then(c => c.put(req, cp)); return n; }).catch(() => r)));
   }
