@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mon Humidor</title>
+<meta name="theme-color" content="#3e2415">
+<meta name="description" content="Scannez une bague de cigare, comprenez-la et progressez.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Humidor">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="humidor.css">
+</head>
+<body>
+<header class="top">
+  <h1>Mon Humidor</h1>
+  <nav class="tabs" aria-label="Navigation"><a href="#scan" id="tScan" data-nav="scan" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.6"/></svg><span>Scanner</span></a><a href="#cave" id="tCave" data-nav="cave"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="9" width="18" height="11" rx="2"/><path d="M3 13h18M6 9V6h12v3"/></svg><span>Mon humidor</span></a><a href="#learn" data-nav="learn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 5.5c3-1.2 6-1 8.5 1 2.5-2 5.5-2.2 8.5-1v13c-3-1.2-6-1-8.5 1-2.5-2-5.5-2.2-8.5-1z"/><path d="M12 6.5v13"/></svg><span>Apprendre</span></a></nav>
+  <button class="gear" id="bSet" type="button">Réglages</button>
+</header>
+
+<main id="vScan">
+  <section class="band hero">
+    <div class="wrap heroGrid" id="hero">
+      <div class="finder">
+        <div class="vf" id="vf"><span class="scanline"></span><i></i><i></i><i></i><i></i><div id="vfIn"></div></div>
+        <div class="btns">
+          <button class="btn main" id="bCam">Photographier le cigare</button>
+          <button class="btn ghost" id="bGal">Depuis la galerie</button>
+        </div>
+        <input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+        <input type="file" id="fGal" accept="image/*" hidden>
+        <div class="opts">
+          <div><label for="price">Prix à la pièce (€)</label><input type="number" id="price" inputmode="decimal" min="0" step="0.5" placeholder="ex. 13,50"></div>
+          <div><label for="byName">Ou tapez le nom du cigare</label><input type="text" id="byName" placeholder="ex. Cohiba Siglo II" enterkeyhint="search"></div>
+          <label class="chk" id="webRow"><input type="checkbox" id="web" checked> Vérifier les prix actuels sur le web</label>
+        </div>
+      </div>
+      <article class="labelCard" id="card" aria-live="polite">
+        <div id="cardIn"></div>
+        <div class="load"><div class="dots"><span></span><span></span><span></span></div><h3 id="loadT">Lecture de la bague</h3><p class="conf" id="loadS">Cela prend 20 à 40 secondes</p><button class="btn line" id="bStop">Annuler</button></div>
+      </article>
+    </div>
+  </section>
+  <section class="band"><div class="wrap"><p class="sampleLine" id="sampleLine">Exemple : la fiche d'un Montecristo No. 4. Photographiez votre cigare pour obtenir la vôtre.</p><div class="tabs2" id="tabs" role="tablist"></div><div class="grid" id="details"></div></div></section>
+</main>
+
+<main id="vCave" hidden>
+  <section class="band hero"><div class="wrap">
+    <h2 style="font-size:clamp(32px,4vw,46px)">Mon humidor et mes progrès</h2>
+    <div class="stats" id="stats"></div>
+    <div class="know" id="know"></div>
+  </div></section>
+  <section class="band"><div class="wrap">
+    <div class="filters"><input type="search" id="q" placeholder="Rechercher une marque, un pays, un format"><select id="fStr"><option value="">Toutes forces</option><option value="1">Légers</option><option value="3">Moyens</option><option value="5">Corsés</option></select><select id="fStatus"><option value="">Tous statuts</option><option>À fumer</option><option>Fumé</option><option>En humidor</option><option>Envie</option></select><select id="fSort" aria-label="Trier"><option value="recent">Plus récents</option><option value="score">Meilleure note</option><option value="value">Meilleur rapport qualité/prix</option><option value="price">Prix croissant</option><option value="mine">Mes étoiles</option><option value="stock">Stock</option></select><label><input type="checkbox" id="fStock"> En stock</label><button type="button" class="btn line" id="bCmp">Comparer deux cigares</button></div>
+    <div id="cmp" aria-live="polite"></div>
+    <div class="cave" id="caveList"></div>
+  </div></section>
+</main>
+
+<main id="vLearn" hidden>
+  <section class="band hero"><div class="wrap"><h2 style="font-size:clamp(34px,4.6vw,52px)">Apprendre</h2><div class="lvl" id="lvl"></div></div></section>
+  <section class="band"><div class="wrap grid" id="learnBody"></div></section>
+</main>
+
+<button class="fab" id="fab" aria-label="Demander à l'expert"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/></svg><span>Demander à l'expert</span></button>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Questions à l'expert" aria-hidden="true">
+  <div class="dHead"><h3>L'expert cigare<small id="dWine">Montecristo No. 4</small></h3><button class="x" id="dClose" aria-label="Fermer">×</button></div>
+  <div class="msgs" id="msgs"></div>
+  <div class="sugg" id="sugg"></div>
+  <form class="ask" id="askF"><button type="button" class="mic" id="mic" hidden aria-label="Dicter">Micro</button><input id="askI" placeholder="Posez votre question sur ce cigare" autocomplete="off"><button id="askB">Envoyer</button></form>
+</aside>
+
+<dialog id="dSet" aria-labelledby="dSetT">
+  <form method="dialog" class="dlg" id="setF">
+    <h3 id="dSetT">Réglages</h3>
+    <p id="keyHelp">Cette application utilise votre propre clé API Anthropic pour analyser les cigares. La clé reste dans cet appareil et n'est envoyée qu'à Anthropic. Créez-en une sur <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>. Les analyses sont facturées sur votre compte API.</p>
+    <label>Clé API Anthropic<input type="password" id="sKey" placeholder="sk-ant-…" autocomplete="off" spellcheck="false"></label>
+    <label>Modèle pour l'analyse des cigares<input type="text" id="sComplex" placeholder="claude-sonnet-5-5" autocomplete="off"></label>
+    <label>Modèle pour les questions<input type="text" id="sFast" placeholder="claude-haiku-5-5" autocomplete="off"></label>
+    <div class="row"><button class="btn solid" value="save" id="sSave">Enregistrer</button><button class="btn line" value="cancel" formnovalidate>Fermer</button></div>
+    <hr style="border:0;border-top:1px solid var(--line);width:100%">
+    <h3 style="font-size:22px">Mon humidor</h3>
+    <div class="row"><button type="button" class="btn line" id="bExp">Exporter (fichier)</button><button type="button" class="btn line" id="bImp">Importer</button><button type="button" class="btn line" id="bWipe">Tout effacer</button></div>
+    <input type="file" id="fImp" accept="application/json,.json" hidden>
+    <p>Votre humidor est enregistré uniquement sur cet appareil. Pensez à exporter une sauvegarde de temps en temps.</p>
+  </form>
+</dialog>
+<p class="foot">Réservé aux adultes. Fumer nuit à la santé.</p>
+<div class="toast" id="toast"></div>
+
+<script src="engine.js"></script>
+<script src="app.js"></script>
+<script>if('serviceWorker' in navigator&&location.protocol!=='file:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))</script>
+</body>
+</html>

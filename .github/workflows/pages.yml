@@ -1,8 +1,8 @@
-name: Déployer Mon Sommelier
+name: Déployer les applications
 on:
   push:
     branches: [main]
-    paths: ['mon-sommelier/**']
+    paths: ['mon-sommelier/**', 'mon-humidor/**']
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,9 +19,14 @@ jobs:
       url: ${{ steps.d.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: Assembler le site
+        run: |
+          mkdir _site
+          cp -r mon-sommelier mon-humidor _site/
+          printf '<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Mes applications</title><body style="font-family:system-ui;max-width:30em;margin:3em auto;padding:0 1em"><h1>Mes applications</h1><p><a href="mon-sommelier/">Mon Sommelier</a></p><p><a href="mon-humidor/">Mon Humidor</a></p>' > _site/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: mon-sommelier
+          path: _site
       - id: d
         uses: actions/deploy-pages@v4
